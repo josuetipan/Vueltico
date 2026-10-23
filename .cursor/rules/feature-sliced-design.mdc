@@ -1,0 +1,34 @@
+---
+description: Vueltico usa Feature-Sliced Design (FSD). Respetar capas e imports.
+globs: src/**/*
+alwaysApply: true
+---
+
+# Feature-Sliced Design (Vueltico)
+
+## Capas (de arriba a abajo)
+
+1. **app** — `src/app/`: providers, router, estilos globales, `App.tsx`
+2. **pages** — `src/pages/`: composición de pantallas; solo ensamblan widgets/features
+3. **widgets** — `src/widgets/`: bloques UI compuestos (shell, sidebar, reportes)
+4. **features** — `src/features/`: acciones de usuario (login, listado empresas, bandeja transferencias)
+5. **entities** — `src/entities/`: modelos de negocio, API mock, UI mínima de entidad (badges)
+6. **shared** — `src/shared/`: UI kit, lib, config (sin lógica de dominio)
+
+## Segmentos por slice
+
+Dentro de cada slice: `ui/`, `model/`, `api/`, `lib/`, `config/` según aplique.
+
+## Reglas de import
+
+- Una capa **solo importa capas inferiores** (pages → widgets → features → entities → shared).
+- **No** importar otra slice de la misma capa por rutas internas profundas: usar **`index.ts`** (public API) del slice.
+- **No** volver a `src/modules/` ni arquitectura hexagonal en carpetas nuevas.
+
+## Prototipos
+
+Exploración UI en `src/pages/prototypes/<dominio>/`. Tras validar, migrar a features/entities/pages definitivos.
+
+## Entrada
+
+`src/main.tsx` → `@/app/App` + `@/app/styles/globals.css`.

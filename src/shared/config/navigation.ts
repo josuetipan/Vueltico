@@ -1,15 +1,19 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  BarChart3,
   Building2,
   CreditCard,
   FileSearch,
+  KeyRound,
   LayoutDashboard,
+  Palette,
   Settings,
   Shield,
+  UserCog,
   Users,
   Wallet,
 } from "lucide-react";
-import type { UserRole } from "@/modules/identity/domain/session";
+import type { UserRole } from "@/entities/session";
 
 export type NavItem = {
   title: string;
@@ -48,10 +52,9 @@ const superadminNav: NavSection[] = [
         disabled: true,
       },
       {
-        title: "Usuarios globales",
-        href: "/app/superadmin/usuarios",
-        icon: Users,
-        disabled: true,
+        title: "Administradores",
+        href: "/app/superadmin/administradores",
+        icon: UserCog,
       },
     ],
   },
@@ -59,10 +62,20 @@ const superadminNav: NavSection[] = [
     label: "Gobernanza",
     items: [
       {
+        title: "Permisos y roles",
+        href: "/app/superadmin/gobernanza",
+        icon: KeyRound,
+      },
+      {
         title: "Auditoría",
         href: "/app/superadmin/auditoria",
         icon: FileSearch,
         disabled: true,
+      },
+      {
+        title: "Parametrización",
+        href: "/app/superadmin/parametrizacion",
+        icon: Palette,
       },
       {
         title: "Configuración",
@@ -105,6 +118,16 @@ const companyAdminNav: NavSection[] = [
   {
     label: "Operaciones",
     items: [
+      {
+        title: "Reportes",
+        href: "/app/empresa/reportes",
+        icon: BarChart3,
+      },
+      {
+        title: "Verificar transferencias",
+        href: "/app/empresa/transferencias",
+        icon: FileSearch,
+      },
       {
         title: "Tesorería",
         href: "/app/empresa/tesoreria",

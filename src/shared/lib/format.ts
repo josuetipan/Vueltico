@@ -1,6 +1,10 @@
 const ECUADOR_LOCALE = "es-EC";
 const USD = "USD";
 
+export function formatUsdFromCents(cents: number): string {
+  return formatUsd(cents / 100);
+}
+
 export function formatUsd(amount: number): string {
   return new Intl.NumberFormat(ECUADOR_LOCALE, {
     style: "currency",
