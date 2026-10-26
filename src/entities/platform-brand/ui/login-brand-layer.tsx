@@ -34,6 +34,65 @@ type LoginBrandLayerProps = {
   variant?: "login" | "preview";
 };
 
+const LOGO_PAIR_KEYS = ["logoWordmark", "logoCollaboration"] as const;
+
+function BrandLogoPair({
+  config,
+  variant,
+}: {
+  config: LoginBrandingConfig;
+  variant: "login" | "preview";
+}) {
+  const wordmarkSlot = config.logoWordmark;
+  const collabSlot = config.logoCollaboration;
+  const wordmarkSrc = resolveLoginBrandImageSrc("logoWordmark", wordmarkSlot);
+  const collabSrc = resolveLoginBrandImageSrc("logoCollaboration", collabSlot);
+
+  if (!wordmarkSrc && !collabSrc) return null;
+
+  const anchorSlot = wordmarkSrc ? wordmarkSlot : collabSlot;
+  if (anchorSlot.placement === "cover") return null;
+
+  const placement = anchorSlot.placement as Exclude<LoginBrandPlacement, "cover">;
+  const placementClass = PLACEMENT_CLASS[placement] ?? PLACEMENT_CLASS["top-start"];
+  const showDivider = Boolean(wordmarkSrc && collabSrc);
+
+  return (
+    <div
+      className={cn(
+        "absolute flex max-w-[85%] items-center gap-3",
+        placementClass,
+        variant === "preview" && "select-none",
+      )}
+    >
+      {wordmarkSrc ? (
+        <img
+          src={wordmarkSrc}
+          alt=""
+          className={cn("h-auto w-auto shrink-0 object-contain", SIZE_CLASS[wordmarkSlot.size])}
+          style={{ opacity: wordmarkSlot.opacity / 100 }}
+          draggable={false}
+        />
+      ) : null}
+      {showDivider ? (
+        <span
+          className="h-10 w-px shrink-0 self-center bg-white/90"
+          aria-hidden
+        />
+      ) : null}
+      {collabSrc ? (
+        <img
+          src={collabSrc}
+          alt=""
+          className={cn("h-auto w-auto shrink-0 object-contain", SIZE_CLASS[collabSlot.size])}
+          style={{ opacity: collabSlot.opacity / 100 }}
+          draggable={false}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 function BrandImageSlot({
   slotKey,
   config,
@@ -70,7 +129,9 @@ export function LoginBrandLayer({ config, variant = "login" }: LoginBrandLayerPr
   const bgSrc = resolveLoginBrandImageSrc("background", config.background);
   const bgOpacity = config.background.opacity / 100;
 
-  const overlayKeys = LOGIN_BRAND_IMAGE_KEYS.filter((k) => k !== "background");
+  const overlayKeys = LOGIN_BRAND_IMAGE_KEYS.filter(
+    (k) => k !== "background" && !LOGO_PAIR_KEYS.includes(k as (typeof LOGO_PAIR_KEYS)[number]),
+  );
 
   return (
     <>
@@ -107,6 +168,7 @@ export function LoginBrandLayer({ config, variant = "login" }: LoginBrandLayerPr
         )}
         aria-hidden
       >
+        <BrandLogoPair config={config} variant={variant} />
         {overlayKeys.map((key) => (
           <BrandImageSlot key={key} slotKey={key} config={config} variant={variant} />
         ))}

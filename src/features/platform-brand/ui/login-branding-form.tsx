@@ -59,7 +59,10 @@ export function LoginBrandingForm() {
   }
 
   function onClearImage(key: LoginBrandImageKey) {
-    patchSlot(key, { src: DEFAULT_LOGIN_BRAND_ASSETS[key] });
+    patchSlot(key, {
+      src: DEFAULT_LOGIN_BRAND_ASSETS[key],
+      ...(key === "logoCollaboration" ? { enabled: false } : {}),
+    });
     const input = fileRefs.current[key];
     if (input) input.value = "";
   }
@@ -86,6 +89,7 @@ export function LoginBrandingForm() {
             const meta = LOGIN_BRAND_IMAGE_META[key];
             const slot = draft[key];
             const isBackground = key === "background";
+            const isLogoCollaboration = key === "logoCollaboration";
             const isOpen = openKey === key;
             const placementOptions = isBackground
               ? (["cover"] as const)
@@ -143,7 +147,13 @@ export function LoginBrandingForm() {
                       </Button>
                     </div>
 
-                    {!isBackground ? (
+                    {isLogoCollaboration ? (
+                      <p className="text-xs text-muted-foreground">
+                        Se muestra junto al logo escrito; la ubicación la define el logo escrito.
+                      </p>
+                    ) : null}
+
+                    {!isBackground && !isLogoCollaboration ? (
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
                           <Label htmlFor={`placement-${key}`} className="text-xs">
@@ -187,6 +197,30 @@ export function LoginBrandingForm() {
                             ))}
                           </select>
                         </div>
+                      </div>
+                    ) : null}
+
+                    {!isBackground && isLogoCollaboration ? (
+                      <div className="space-y-1.5">
+                        <Label htmlFor={`size-${key}`} className="text-xs">
+                          Tamaño
+                        </Label>
+                        <select
+                          id={`size-${key}`}
+                          value={slot.size}
+                          onChange={(e) =>
+                            patchSlot(key, {
+                              size: e.target.value as LoginBrandImageSlot["size"],
+                            })
+                          }
+                          className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          {LOGIN_BRAND_SIZE_PRESETS.map((s) => (
+                            <option key={s} value={s}>
+                              {SIZE_LABELS[s]}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     ) : null}
 

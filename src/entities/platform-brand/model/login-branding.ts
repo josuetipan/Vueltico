@@ -1,8 +1,9 @@
-/** Cuatro imágenes del branding de login (parametrizables por superadmin). */
+/** Imágenes del branding de login (parametrizables por superadmin). */
 export const LOGIN_BRAND_IMAGE_KEYS = [
   "background",
   "logoSymbol",
   "logoWordmark",
+  "logoCollaboration",
   "letters",
 ] as const;
 
@@ -43,6 +44,7 @@ export const DEFAULT_LOGIN_BRAND_ASSETS: Record<
   background: "",
   logoSymbol: "/brand/logo-symbol.png",
   logoWordmark: "/brand/logo-wordmark.png",
+  logoCollaboration: "",
   letters: "",
 };
 
@@ -55,12 +57,16 @@ export const LOGIN_BRAND_IMAGE_META: Record<
     placementHint: "Suele ir a pantalla completa; si está vacío se usa el gradiente de colores.",
   },
   logoSymbol: {
-    label: "Logo imagen",
-    placementHint: "Isotipo o símbolo.",
+    label: "Logo imagen (login)",
+    placementHint: "Isotipo suelto en la pantalla de login (p. ej. marca de agua). Para el menú lateral use «Marca menú».",
   },
   logoWordmark: {
-    label: "Logo escrito",
-    placementHint: "Wordmark horizontal.",
+    label: "Logo escrito (login)",
+    placementHint: "Wordmark en la composición del login; puede ir junto al logo de colaboración en la misma zona.",
+  },
+  logoCollaboration: {
+    label: "Logo colaboración (login)",
+    placementHint: "Opcional en login. Con logo escrito activo, muestra línea vertical y este logo al lado.",
   },
   letters: {
     label: "Letras",
@@ -86,13 +92,18 @@ function defaultSlot(
     src: DEFAULT_LOGIN_BRAND_ASSETS[key],
     enabled: key !== "letters",
     opacity: key === "logoSymbol" ? 14 : key === "background" ? 100 : 100,
-    size: key === "logoSymbol" ? "watermark" : key === "logoWordmark" ? "sm" : "md",
+    size:
+      key === "logoSymbol"
+        ? "watermark"
+        : key === "logoWordmark" || key === "logoCollaboration"
+          ? "sm"
+          : "md",
     placement:
       key === "background"
         ? "cover"
         : key === "logoSymbol"
           ? "center"
-          : key === "logoWordmark"
+          : key === "logoWordmark" || key === "logoCollaboration"
             ? "top-start"
             : "bottom-start",
   };
@@ -103,6 +114,7 @@ export const DEFAULT_LOGIN_BRANDING: LoginBrandingConfig = {
   background: defaultSlot("background"),
   logoSymbol: defaultSlot("logoSymbol"),
   logoWordmark: defaultSlot("logoWordmark"),
+  logoCollaboration: defaultSlot("logoCollaboration", { enabled: false }),
   letters: defaultSlot("letters", { enabled: false }),
 };
 

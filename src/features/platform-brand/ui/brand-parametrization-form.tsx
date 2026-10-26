@@ -29,18 +29,21 @@ import { Label } from "@/shared/ui/label";
 import { VuelticoLogo } from "@/shared/ui/brand/vueltico-logo";
 
 import { LoginBrandingForm } from "./login-branding-form";
+import { ShellBrandingForm } from "./shell-branding-form";
 
 import { cn } from "@/shared/lib/utils";
 
 
 
-type ParamTab = "colors" | "login";
+type ParamTab = "colors" | "shell" | "login";
 
 
 
 const TAB_LABELS: Record<ParamTab, string> = {
 
   colors: "Colores",
+
+  shell: "Marca menú",
 
   login: "Branding login",
 
@@ -52,7 +55,7 @@ export function BrandParametrizationForm() {
 
   const { palette, savePalette, resetPalette } = useBrandPaletteContext();
 
-  const [tab, setTab] = useState<ParamTab>("login");
+  const [tab, setTab] = useState<ParamTab>("shell");
 
   const [draft, setDraft] = useState<BrandPalette>(palette);
 
@@ -311,6 +314,10 @@ export function BrandParametrizationForm() {
           </div>
 
         </div>
+
+      ) : tab === "shell" ? (
+
+        <ShellBrandingForm />
 
       ) : (
 

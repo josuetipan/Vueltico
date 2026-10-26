@@ -3,26 +3,22 @@ import { cn } from "@/shared/lib/utils";
 import type { NavSection } from "@/shared/config/navigation";
 import { ScrollArea } from "@/shared/ui/scroll-area";
 import { Badge } from "@/shared/ui/badge";
-import { VuelticoLogo } from "@/shared/ui/brand/vueltico-logo";
+import { ShellBrandHeader } from "@/entities/platform-brand/ui/shell-brand-header";
+import type { ShellBrandingConfig } from "@/entities/platform-brand/model/shell-branding";
 
 type AppSidebarProps = {
   sections: NavSection[];
+  shellBranding: ShellBrandingConfig;
   onNavigate?: () => void;
 };
 
-export function AppSidebar({ sections, onNavigate }: AppSidebarProps) {
+export function AppSidebar({ sections, shellBranding, onNavigate }: AppSidebarProps) {
   const pathname = useLocation().pathname;
 
   return (
     <aside className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-4">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white/10">
-          <VuelticoLogo variant="symbol" className="h-7 w-7 object-contain" alt="" />
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold tracking-tight">Vueltico</p>
-          <p className="truncate text-xs text-sidebar-muted">Plataforma B2B</p>
-        </div>
+      <div className="flex h-14 items-center border-b border-sidebar-border px-4">
+        <ShellBrandHeader config={shellBranding} variant="sidebar" className="w-full" />
       </div>
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-6" aria-label="Navegación principal">

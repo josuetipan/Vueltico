@@ -9,6 +9,7 @@ import { useSession } from "@/features/auth/model/use-session";
 import { getNavigationForRole } from "@/shared/config/navigation";
 import { buildOperatorNavigation } from "@/features/operator-portal/config/operator-navigation";
 import { useOperatorContext } from "@/features/operator-portal/model/use-operator-context";
+import { useBrandPaletteContext } from "@/features/platform-brand/ui/brand-palette-provider";
 import { StatePanel } from "@/shared/ui/feedback/state-panel";
 import { AppSidebar } from "@/widgets/app-sidebar";
 import { AppTopbar } from "@/widgets/app-topbar";
@@ -38,6 +39,7 @@ export function AppShell({ children, breadcrumbs }: AppShellProps) {
   }, [isLoading, session, navigate, pathname]);
 
   const { profile: operatorProfile, tenants: operatorTenants } = useOperatorContext();
+  const { shellBranding } = useBrandPaletteContext();
 
   const navSections = useMemo(() => {
     if (!session) return [];
@@ -66,13 +68,14 @@ export function AppShell({ children, breadcrumbs }: AppShellProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="fixed inset-y-0 left-0 z-30 hidden w-64 lg:block">
-        <AppSidebar sections={navSections} />
+        <AppSidebar sections={navSections} shellBranding={shellBranding} />
       </div>
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
         <SheetContent side="left" className="w-[min(100%,18rem)] p-0">
           <SheetTitle className="sr-only">Navegación</SheetTitle>
           <AppSidebar
             sections={navSections}
+            shellBranding={shellBranding}
             onNavigate={() => setMobileNavOpen(false)}
           />
         </SheetContent>

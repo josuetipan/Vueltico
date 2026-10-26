@@ -22,3 +22,15 @@ export {
   type LoginBrandPlacement,
 } from "./model/login-branding";
 export { LoginBrandLayer } from "./ui/login-brand-layer";
+export {
+  DEFAULT_SHELL_BRANDING,
+  DEFAULT_SHELL_BRAND_ASSETS,
+  SHELL_BRAND_IMAGE_KEYS,
+  SHELL_BRAND_IMAGE_META,
+  normalizeShellBranding,
+  resolveShellBrandImageSrc,
+  type ShellBrandImageKey,
+  type ShellBrandingConfig,
+  type ShellBrandImageSlot,
+} from "./model/shell-branding";
+export { ShellBrandHeader } from "./ui/shell-brand-header";
