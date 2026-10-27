@@ -1,3 +1,5 @@
+import type { SubscriptionStatus } from "@/entities/organization/model/organization";
+
 export type PeriodDays = 7 | 30 | 90;
 
 export type AggregatedPlatformMetrics = {
@@ -25,11 +27,11 @@ export type AggregatedPlatformMetrics = {
 export type RecentOrganizationRecord = {
   id: string;
   tradeName: string;
-  ruc: string;
-  status: "active" | "suspended" | "trial";
+  taxId: string;
+  subscriptionStatus: SubscriptionStatus;
   planName: string;
-  activeUsers: number;
-  registeredAt: string;
+  memberCount: number;
+  createdAt: string;
 };
 
 export const platformAdminUseCases = {
@@ -68,11 +70,11 @@ export const platformAdminUseCases = {
       {
         id: "org-001",
         tradeName: "Andina Retail",
-        ruc: "1790123456001",
-        status: "active" as const,
+        taxId: "1790123456001",
+        subscriptionStatus: "ACTIVE" as const,
         planName: "Business",
-        activeUsers: 12,
-        registeredAt: "2026-10-18T14:20:00Z",
+        memberCount: 12,
+        createdAt: "2026-10-18T14:20:00Z",
       },
     ].slice(0, limit);
   },

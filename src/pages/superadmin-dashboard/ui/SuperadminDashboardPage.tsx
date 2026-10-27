@@ -14,7 +14,7 @@ import {
 import { RoleDashboardShell } from "@/widgets/role-dashboard-shell";
 import { PageHeader } from "@/shared/ui/layout/page-header";
 import { StatePanel } from "@/shared/ui/feedback/state-panel";
-import { formatDateEc, formatUsd } from "@/shared/lib/format";
+import { formatDateTimeEc, formatUsd } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
@@ -25,17 +25,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card";
+import { OrganizationStatusBadge } from "@/entities/organization/ui/organization-status-badge";
+import type { SubscriptionStatus } from "@/entities/organization/model/organization";
+import { DataTableToolbar } from "@/shared/ui/data/data-table-toolbar";
+import { DataTableCard } from "@/shared/ui/data/data-table-card";
+import {
+  DataTableShell,
+  dataTableHeadClass,
+  dataTableTdClass,
+  dataTableThClass,
+} from "@/shared/ui/data/data-table-shell";
+import { SelectField } from "@/shared/ui/select-field";
+import { paginateSlice, TABLE_PAGE_SIZE } from "@/shared/lib/table-pagination";
+import { TablePagination } from "@/shared/ui/data/table-pagination";
 
 const PERIODS: PeriodDays[] = [7, 30, 90];
 
-function orgStatusBadge(status: "active" | "suspended" | "trial") {
-  if (status === "active") return <Badge variant="success">Activa</Badge>;
-  if (status === "trial") return <Badge variant="warning">Prueba</Badge>;
-  return <Badge variant="secondary">Suspendida</Badge>;
-}
-
 export function SuperadminDashboardClient() {
   const [period, setPeriod] = useState<PeriodDays>(30);
+  const [orgSearch, setOrgSearch] = useState("");
+  const [orgStatus, setOrgStatus] = useState<SubscriptionStatus | "all">("all");
+  const [orgPage, setOrgPage] = useState(1);
 
   const metricsQuery = useQuery({
     queryKey: ["platform-admin", "metrics", period],
@@ -44,8 +54,27 @@ export function SuperadminDashboardClient() {
 
   const recentQuery = useQuery({
     queryKey: ["platform-admin", "recent-orgs"],
-    queryFn: () => platformAdminUseCases.getRecentOrganizations(5),
+    queryFn: () => platformAdminUseCases.getRecentOrganizations(50),
   });
+
+  const filteredRecentOrgs = useMemo(() => {
+    const list = recentQuery.data ?? [];
+    const q = orgSearch.trim().toLowerCase();
+    return list.filter((row) => {
+      if (orgStatus !== "all" && row.subscriptionStatus !== orgStatus) return false;
+      if (!q) return true;
+      return (
+        row.tradeName.toLowerCase().includes(q) ||
+        row.taxId.includes(q) ||
+        row.planName.toLowerCase().includes(q)
+      );
+    });
+  }, [recentQuery.data, orgSearch, orgStatus]);
+
+  const recentOrgsPage = useMemo(
+    () => paginateSlice(filteredRecentOrgs, orgPage, TABLE_PAGE_SIZE),
+    [filteredRecentOrgs, orgPage],
+  );
 
   const storagePct = useMemo(() => {
     const m = metricsQuery.data;
@@ -182,44 +211,91 @@ export function SuperadminDashboardClient() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle>Últimas organizaciones registradas</CardTitle>
-                  <CardDescription>Altas recientes en la plataforma</CardDescription>
-                </CardHeader>
-                <CardContent className="overflow-x-auto">
-                  {recentQuery.data && recentQuery.data.length > 0 ? (
-                    <table className="w-full min-w-[640px] text-sm">
-                      <thead>
-                        <tr className="border-b text-left text-muted-foreground">
-                          <th className="pb-2 font-medium">Organización</th>
-                          <th className="pb-2 font-medium">RUC</th>
-                          <th className="pb-2 font-medium">Estado</th>
-                          <th className="pb-2 font-medium">Plan</th>
-                          <th className="pb-2 font-medium">Usuarios</th>
-                          <th className="pb-2 font-medium">Registro</th>
+              <div className="lg:col-span-2">
+                <DataTableCard
+                  toolbar={
+                    <DataTableToolbar
+                      searchPlaceholder="Organización o RUC…"
+                      searchValue={orgSearch}
+                      onSearchChange={(v) => {
+                        setOrgSearch(v);
+                        setOrgPage(1);
+                      }}
+                      filters={
+                        <SelectField
+                          id="dashboard-org-status"
+                          variant="toolbar"
+                          label="Suscripción"
+                          value={orgStatus}
+                          onChange={(v) => {
+                            setOrgStatus(v as SubscriptionStatus | "all");
+                            setOrgPage(1);
+                          }}
+                          options={[
+                            { value: "all", label: "Todos" },
+                            { value: "ACTIVE", label: "Activa" },
+                            { value: "TRIAL", label: "Prueba" },
+                            { value: "PAST_DUE", label: "Pago pendiente" },
+                            { value: "CANCELED", label: "Cancelada" },
+                            { value: "EXPIRED", label: "Expirada" },
+                          ]}
+                        />
+                      }
+                    />
+                  }
+                  footer={
+                    recentOrgsPage.meta.totalItems > 0 ? (
+                      <TablePagination
+                        page={recentOrgsPage.meta.page}
+                        totalPages={recentOrgsPage.meta.totalPages}
+                        totalItems={recentOrgsPage.meta.totalItems}
+                        pageSize={recentOrgsPage.meta.pageSize}
+                        onPageChange={setOrgPage}
+                      />
+                    ) : null
+                  }
+                >
+                  <p className="text-sm font-normal text-foreground/70">
+                    Últimas organizaciones registradas en la plataforma.
+                  </p>
+                  {recentQuery.isLoading ? (
+                    <StatePanel variant="loading" title="Cargando" />
+                  ) : null}
+                  {filteredRecentOrgs.length === 0 ? (
+                    <StatePanel variant="empty" title="Sin resultados" />
+                  ) : null}
+                  {recentOrgsPage.data.length > 0 ? (
+                    <DataTableShell className="rounded-none border-0" tableClassName="min-w-[640px]">
+                      <thead className={dataTableHeadClass}>
+                        <tr>
+                          <th className={dataTableThClass}>Organización</th>
+                          <th className={dataTableThClass}>RUC</th>
+                          <th className={dataTableThClass}>Estado</th>
+                          <th className={dataTableThClass}>Plan</th>
+                          <th className={dataTableThClass}>Usuarios</th>
+                          <th className={dataTableThClass}>Registro</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {recentQuery.data.map((row) => (
+                        {recentOrgsPage.data.map((row) => (
                           <tr key={row.id} className="border-b last:border-0">
-                            <td className="py-3 font-medium">{row.tradeName}</td>
-                            <td className="py-3 font-mono text-xs">{row.ruc}</td>
-                            <td className="py-3">{orgStatusBadge(row.status)}</td>
-                            <td className="py-3">{row.planName}</td>
-                            <td className="py-3 tabular-nums">{row.activeUsers}</td>
-                            <td className="py-3 text-muted-foreground">
-                              {formatDateEc(row.registeredAt)}
+                            <td className={`${dataTableTdClass} font-medium`}>{row.tradeName}</td>
+                            <td className={`${dataTableTdClass} font-mono text-xs`}>{row.taxId}</td>
+                            <td className={dataTableTdClass}>
+                              <OrganizationStatusBadge status={row.subscriptionStatus} />
+                            </td>
+                            <td className={dataTableTdClass}>{row.planName}</td>
+                            <td className={`${dataTableTdClass} tabular-nums`}>{row.memberCount}</td>
+                            <td className={`${dataTableTdClass} text-muted-foreground`}>
+                              {formatDateTimeEc(row.createdAt)}
                             </td>
                           </tr>
                         ))}
                       </tbody>
-                    </table>
-                  ) : (
-                    <StatePanel variant="empty" title="Sin organizaciones recientes" />
-                  )}
-                </CardContent>
-              </Card>
+                    </DataTableShell>
+                  ) : null}
+                </DataTableCard>
+              </div>
 
               <Card>
                 <CardHeader>

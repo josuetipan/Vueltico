@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { GovernanceError, isValidRoleCode, type PlatformRole } from "@/entities/platform-governance";
 import { governanceUseCases } from "@/features/platform-governance/api/governance-composition";
@@ -21,6 +21,15 @@ import {
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog";
 import { cn } from "@/shared/lib/utils";
+import {
+  DataTableShell,
+  dataTableHeadClass,
+  dataTableTdClass,
+  dataTableThClass,
+} from "@/shared/ui/data/data-table-shell";
+import { DataTableToolbar } from "@/shared/ui/data/data-table-toolbar";
+import { DataTableCard } from "@/shared/ui/data/data-table-card";
+import { SelectField } from "@/shared/ui/select-field";
 
 type RoleFormState = {
   code: string;
@@ -36,11 +45,18 @@ const emptyForm = (): RoleFormState => ({
   permissionIds: [],
 });
 
-export function RolesPanel() {
+type RolesPanelProps = {
+  showCreateForm: boolean;
+  onShowCreateFormChange: (open: boolean) => void;
+};
+
+export function RolesPanel({ showCreateForm, onShowCreateFormChange }: RolesPanelProps) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<RoleFormState>(emptyForm());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [kind, setKind] = useState<"all" | "system" | "custom">("all");
 
   const permissionsQuery = useQuery({
     queryKey: ["governance", "permissions"],
@@ -77,6 +93,7 @@ export function RolesPanel() {
       queryClient.invalidateQueries({ queryKey: ["governance", "roles"] });
       setForm(emptyForm());
       setEditingId(null);
+      onShowCreateFormChange(false);
       toast.success(editingId ? "Rol actualizado." : "Rol creado.");
     },
     onError: (err: unknown) => toast.error(mapRoleError(err)),
@@ -93,6 +110,7 @@ export function RolesPanel() {
   });
 
   function startEdit(role: PlatformRole) {
+    onShowCreateFormChange(false);
     setEditingId(role.id);
     setForm({
       code: role.code,
@@ -111,6 +129,21 @@ export function RolesPanel() {
     }));
   }
 
+  const filteredRoles = useMemo(() => {
+    const list = rolesQuery.data ?? [];
+    const q = search.trim().toLowerCase();
+    return list.filter((role) => {
+      if (kind === "system" && !role.isSystem) return false;
+      if (kind === "custom" && role.isSystem) return false;
+      if (!q) return true;
+      return (
+        role.name.toLowerCase().includes(q) ||
+        role.code.toLowerCase().includes(q) ||
+        role.description.toLowerCase().includes(q)
+      );
+    });
+  }, [rolesQuery.data, search, kind]);
+
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!editingId && !isValidRoleCode(form.code)) {
@@ -120,8 +153,22 @@ export function RolesPanel() {
     saveMutation.mutate();
   }
 
+  useEffect(() => {
+    if (!showCreateForm) return;
+    setEditingId(null);
+    setForm(emptyForm());
+  }, [showCreateForm]);
+
+  const sidePanelOpen = showCreateForm || Boolean(editingId);
+
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="space-y-4">
+    <div
+      className={cn(
+        "grid gap-6",
+        sidePanelOpen && "xl:grid-cols-[minmax(0,1fr)_360px]",
+      )}
+    >
       <div className="space-y-4">
         {rolesQuery.isLoading ? (
           <Skeleton className="h-40 w-full" />
@@ -130,19 +177,44 @@ export function RolesPanel() {
           <StatePanel variant="error" title="No se pudieron cargar los roles." />
         ) : null}
         {rolesQuery.data ? (
-          <div className="overflow-hidden rounded-lg border">
-            <table className="w-full text-sm">
-              <thead className="border-b bg-muted/40 text-left">
+          <DataTableCard
+            toolbar={
+              <DataTableToolbar
+                searchPlaceholder="Nombre o código…"
+                searchValue={search}
+                onSearchChange={setSearch}
+                filters={
+                  <SelectField
+                    id="filter-role-kind"
+                    variant="toolbar"
+                    label="Tipo"
+                    value={kind}
+                    onChange={(v) => setKind(v as typeof kind)}
+                    options={[
+                      { value: "all", label: "Todos" },
+                      { value: "system", label: "Sistema" },
+                      { value: "custom", label: "Personalizado" },
+                    ]}
+                  />
+                }
+              />
+            }
+          >
+            {filteredRoles.length === 0 ? (
+              <StatePanel variant="empty" title="Sin resultados" description="Ajuste búsqueda o filtros." />
+            ) : (
+          <DataTableShell className="rounded-none border-0">
+              <thead className={dataTableHeadClass}>
                 <tr>
-                  <th className="px-4 py-2 font-semibold">Rol</th>
-                  <th className="px-4 py-2 font-semibold">Permisos</th>
-                  <th className="w-24 px-2 py-2" aria-label="Acciones" />
+                  <th className={dataTableThClass}>Rol</th>
+                  <th className={dataTableThClass}>Permisos</th>
+                  <th className={`${dataTableThClass} w-24`} aria-label="Acciones" />
                 </tr>
               </thead>
               <tbody>
-                {rolesQuery.data.map((role) => (
+                {filteredRoles.map((role) => (
                   <tr key={role.id} className="border-b last:border-0">
-                    <td className="px-4 py-3 align-top">
+                    <td className={dataTableTdClass}>
                       <div className="font-semibold">{role.name}</div>
                       <div className="font-mono text-xs font-normal text-foreground/70">
                         {role.code}
@@ -153,10 +225,10 @@ export function RolesPanel() {
                         </Badge>
                       ) : null}
                     </td>
-                    <td className="px-4 py-3 align-top">
+                    <td className={dataTableTdClass}>
                       <PermissionCount role={role} permissions={permissionsQuery.data ?? []} />
                     </td>
-                    <td className="px-2 py-3 align-top text-right">
+                    <td className={`${dataTableTdClass} text-right`}>
                       <Button
                         type="button"
                         variant="ghost"
@@ -181,11 +253,13 @@ export function RolesPanel() {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+          </DataTableShell>
+            )}
+          </DataTableCard>
         ) : null}
       </div>
 
+      {sidePanelOpen ? (
       <form
         onSubmit={onSubmit}
         className="h-fit space-y-4 rounded-lg border border-border p-4 xl:sticky xl:top-4"
@@ -270,20 +344,21 @@ export function RolesPanel() {
           <Button type="submit" disabled={saveMutation.isPending}>
             {editingId ? "Guardar rol" : "Crear rol"}
           </Button>
-          {editingId ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setEditingId(null);
-                setForm(emptyForm());
-              }}
-            >
-              Cancelar
-            </Button>
-          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setEditingId(null);
+              onShowCreateFormChange(false);
+              setForm(emptyForm());
+            }}
+          >
+            Cancelar
+          </Button>
         </div>
       </form>
+      ) : null}
+    </div>
 
       <AlertDialog open={deleteId !== null} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent>

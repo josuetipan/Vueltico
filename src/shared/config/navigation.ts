@@ -52,7 +52,7 @@ const superadminNav: NavSection[] = [
         disabled: true,
       },
       {
-        title: "Administradores",
+        title: "Admins. plataforma",
         href: "/app/superadmin/administradores",
         icon: UserCog,
       },

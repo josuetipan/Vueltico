@@ -27,7 +27,20 @@ Dentro de cada slice: `ui/`, `model/`, `api/`, `lib/`, `config/` según aplique.
 
 ## Prototipos
 
-Exploración UI en `src/pages/prototypes/<dominio>/`. Tras validar, migrar a features/entities/pages definitivos.
+Exploración UI en `src/pages/prototypes/<dominio>/`. **No duplicar pantallas**: importar bloques desde `@/widgets/prototype-modules` (reexporta la API pública de cada feature).
+
+- **Bloque** (`*Block`, `*Workspace`): lógica + UI del módulo, sin `RoleDashboardShell`.
+- **Client** (`*Client`): shell + cabecera + bloque; usado en rutas `/app/...`.
+- Tras validar, el bloque sigue siendo la fuente única; el prototipo y producción comparten el mismo componente.
+- En prototipos usar `PrototypeShowcaseLayout` (`@/widgets/prototype-showcase`): **una pestaña = un bloque**, no apilar todos en una sola página.
+
+## Layout UI (listados y pantallas)
+
+- **Ancho**: solo en `*Client` con `PageContent` (`shared/ui/layout/page-content.tsx`): `wide` (tablas), `detail`, `form`. Los `*Block` no llevan `mx-auto max-w-*`.
+- **Cabecera**: `PageHeader` en el client (salvo títulos dinámicos embebidos en el bloque, p. ej. detalle de empresa).
+- **Tablas**: listados con `DataTableCard` + `DataTableToolbar` + `DataTableShell` + `TablePagination`. Misma franja de **Buscar** + filtros (`SelectField variant="toolbar"`) en empresas, admins, gobernanza, transferencias y dashboard. Paginación mínimo **10** (`TABLE_PAGE_SIZE`).
+- **Pestañas internas**: `SegmentTabs` (`shared/ui/layout/segment-tabs.tsx`) — gobernanza, parametrización, showcase de prototipo.
+- **Formulario + tabla**: en desktop preferir `grid` con tabla a la izquierda y panel lateral sticky (roles, administradores), no apilar formulario encima del listado en pantallas anchas.
 
 ## Entrada
 

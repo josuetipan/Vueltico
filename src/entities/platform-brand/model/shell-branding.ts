@@ -13,10 +13,7 @@ export type ShellBrandImageSlot = {
   enabled: boolean;
 };
 
-export type ShellBrandingConfig = Record<ShellBrandImageKey, ShellBrandImageSlot> & {
-  /** Subtítulo bajo el logo escrito (ej. «Plataforma B2B»). */
-  tagline: string;
-};
+export type ShellBrandingConfig = Record<ShellBrandImageKey, ShellBrandImageSlot>;
 
 export const DEFAULT_SHELL_BRAND_ASSETS: Record<ShellBrandImageKey, string> = {
   logoSymbol: "/brand/logo-symbol.png",
@@ -46,7 +43,6 @@ export const DEFAULT_SHELL_BRANDING: ShellBrandingConfig = {
   logoSymbol: { src: DEFAULT_SHELL_BRAND_ASSETS.logoSymbol, enabled: true },
   logoWordmark: { src: DEFAULT_SHELL_BRAND_ASSETS.logoWordmark, enabled: true },
   logoCollaboration: { src: DEFAULT_SHELL_BRAND_ASSETS.logoCollaboration, enabled: false },
-  tagline: "Plataforma B2B",
 };
 
 function normalizeImageSlot(
@@ -69,10 +65,6 @@ export function normalizeShellBranding(
   for (const key of SHELL_BRAND_IMAGE_KEYS) {
     next[key] = normalizeImageSlot(key, input[key]);
   }
-  next.tagline =
-    typeof input.tagline === "string" && input.tagline.trim()
-      ? input.tagline.trim()
-      : DEFAULT_SHELL_BRANDING.tagline;
   return next;
 }
 

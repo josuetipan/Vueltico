@@ -16,6 +16,6 @@ export function createSuspendOrganizationUseCase(repo: OrganizationRepository) {
 
 export function suspendErrorMessage(code: string): string {
   if (code === "NOT_FOUND") return "Organización no encontrada.";
-  if (code === "ALREADY_SUSPENDED") return ruleErrorMessage("ALREADY_SUSPENDED");
+  if (code === "ALREADY_CANCELED") return ruleErrorMessage("ALREADY_CANCELED");
   return "No se pudo suspender la organización.";
 }

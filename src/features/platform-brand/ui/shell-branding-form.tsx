@@ -13,15 +13,13 @@ import { ShellBrandHeader } from "@/entities/platform-brand/ui/shell-brand-heade
 import { useBrandPaletteContext } from "./brand-palette-provider";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
 import { cn } from "@/shared/lib/utils";
 
 export function ShellBrandingForm() {
   const { shellBranding, saveShellBranding, resetShellBranding, palette } =
     useBrandPaletteContext();
   const [draft, setDraft] = useState<ShellBrandingConfig>(shellBranding);
-  const [openKey, setOpenKey] = useState<ShellBrandImageKey | "tagline">("logoSymbol");
+  const [openKey, setOpenKey] = useState<ShellBrandImageKey>("logoSymbol");
   const fileRefs = useRef<Partial<Record<ShellBrandImageKey, HTMLInputElement | null>>>({});
 
   useEffect(() => {
@@ -134,37 +132,6 @@ export function ShellBrandingForm() {
               </div>
             );
           })}
-
-          <div className="overflow-hidden rounded-lg border border-border">
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
-              aria-expanded={openKey === "tagline"}
-              onClick={() => setOpenKey("tagline")}
-            >
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 shrink-0 text-foreground/50 transition-transform",
-                  openKey === "tagline" && "rotate-180",
-                )}
-                aria-hidden
-              />
-              <span className="font-semibold text-foreground">Subtítulo</span>
-            </button>
-            {openKey === "tagline" ? (
-              <div className="space-y-2 border-t border-border px-4 py-4">
-                <Label htmlFor="shell-tagline" className="text-xs">
-                  Texto bajo el logo escrito
-                </Label>
-                <Input
-                  id="shell-tagline"
-                  value={draft.tagline}
-                  onChange={(e) => setDraft((prev) => ({ ...prev, tagline: e.target.value }))}
-                  placeholder="Plataforma B2B"
-                />
-              </div>
-            ) : null}
-          </div>
 
           <div className="flex flex-wrap gap-2 pt-4 lg:hidden">
             <Button type="button" onClick={onSave}>

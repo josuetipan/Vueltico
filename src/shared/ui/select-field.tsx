@@ -9,6 +9,10 @@ type SelectFieldProps = {
   options: { value: string; label: string }[];
   error?: string;
   className?: string;
+  disabled?: boolean;
+  hideLabel?: boolean;
+  /** `toolbar`: compacto, alineado con DataTableToolbar. */
+  variant?: "default" | "toolbar";
 };
 
 export function SelectField({
@@ -19,15 +23,32 @@ export function SelectField({
   options,
   error,
   className,
+  disabled,
+  hideLabel,
+  variant = "default",
 }: SelectFieldProps) {
+  const isToolbar = variant === "toolbar";
+
   return (
-    <div className={cn("space-y-2", className)}>
-      <Label htmlFor={id}>{label}</Label>
+    <div className={cn(isToolbar ? "min-w-0 space-y-1" : hideLabel ? "" : "space-y-2", className)}>
+      {hideLabel ? null : (
+        <Label
+          htmlFor={id}
+          className={cn(isToolbar && "text-xs font-medium text-muted-foreground")}
+        >
+          {label}
+        </Label>
+      )}
       <select
         id={id}
         value={value}
+        disabled={disabled}
+        aria-label={hideLabel ? label : undefined}
         onChange={(e) => onChange(e.target.value)}
-        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className={cn(
+          "flex w-full rounded-md border border-input bg-background px-2.5 py-1 text-sm shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          isToolbar ? "h-8" : "h-9 shadow-sm",
+        )}
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

@@ -1,3 +1,4 @@
+import type { PlanId } from "@/entities/plan";
 import type { PlatformAdministrator, PlatformAdminStatus } from "../model/platform-admin";
 import type { PlatformPermission } from "../model/permission";
 import type { PlatformRole } from "../model/role";
@@ -21,17 +22,22 @@ export type UpdateRoleInput = {
   permissionIds: string[];
 };
 
-export type CreatePlatformAdminInput = {
+export type PlatformAdminRegistrationInput = {
   email: string;
   fullName: string;
-  roleId: string;
-};
-
-export type UpdatePlatformAdminInput = {
-  fullName: string;
+  identification: string;
+  city: string;
+  stateRegion: string;
+  phone: string;
+  planId: PlanId;
   roleId: string;
   status: PlatformAdminStatus;
+  expiresAt: string;
 };
+
+export type CreatePlatformAdminInput = PlatformAdminRegistrationInput;
+
+export type UpdatePlatformAdminInput = PlatformAdminRegistrationInput;
 
 export type GovernanceRepository = {
   listPermissions(): Promise<PlatformPermission[]>;

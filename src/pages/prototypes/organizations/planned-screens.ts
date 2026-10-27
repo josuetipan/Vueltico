@@ -9,26 +9,20 @@ export const ORGANIZATIONS_PLANNED_SCREENS: PlannedScreen[] = [
   },
   {
     id: "wizard",
-    title: "Alta de organización",
-    description: "Asistente en pasos: datos, plan, límites e invitación.",
+    title: "Registro de organización",
+    description: "Asistente: datos, plan y administrador principal de la empresa.",
     status: "en-diseno",
   },
   {
     id: "detail",
     title: "Ficha de empresa",
-    description: "Resumen, admin principal, suspender o reactivar.",
+    description: "Datos del tenant, usuarios de la empresa, suspender o reactivar.",
     status: "en-diseno",
   },
   {
     id: "edit",
     title: "Edición",
     description: "Datos legales, plan y límites operativos.",
-    status: "borrador",
-  },
-  {
-    id: "invite-admin",
-    title: "Invitar admin principal",
-    description: "Formulario de invitación sin gestión de contraseñas.",
     status: "borrador",
   },
 ];

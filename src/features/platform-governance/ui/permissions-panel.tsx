@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { GovernanceError, isValidPermissionCode } from "@/entities/platform-governance";
 import { governanceUseCases } from "@/features/platform-governance/api/governance-composition";
@@ -20,13 +20,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog";
+import {
+  DataTableShell,
+  dataTableHeadClass,
+  dataTableTdClass,
+  dataTableThClass,
+} from "@/shared/ui/data/data-table-shell";
+import { DataTableToolbar } from "@/shared/ui/data/data-table-toolbar";
+import { DataTableCard } from "@/shared/ui/data/data-table-card";
+import { SelectField } from "@/shared/ui/select-field";
+import { cn } from "@/shared/lib/utils";
 
-export function PermissionsPanel() {
+type PermissionsPanelProps = {
+  showCreateForm: boolean;
+  onShowCreateFormChange: (open: boolean) => void;
+};
+
+export function PermissionsPanel({
+  showCreateForm,
+  onShowCreateFormChange,
+}: PermissionsPanelProps) {
   const queryClient = useQueryClient();
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [moduleName, setModuleName] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [moduleFilter, setModuleFilter] = useState<string | "all">("all");
+  const [origin, setOrigin] = useState<"all" | "system" | "custom">("all");
 
   const query = useQuery({
     queryKey: ["governance", "permissions"],
@@ -40,6 +61,7 @@ export function PermissionsPanel() {
       setCode("");
       setName("");
       setModuleName("");
+      onShowCreateFormChange(false);
       toast.success("Permiso creado.");
     },
     onError: (err: unknown) => {
@@ -68,10 +90,38 @@ export function PermissionsPanel() {
     createMutation.mutate({ code, name, module: moduleName });
   }
 
-  const grouped = groupByModule(query.data ?? []);
+  const moduleOptions = useMemo(() => {
+    const modules = [...new Set((query.data ?? []).map((p) => p.module || "General"))];
+    return modules.sort().map((m) => ({ value: m, label: m }));
+  }, [query.data]);
+
+  const filteredPermissions = useMemo(() => {
+    let list = query.data ?? [];
+    if (moduleFilter !== "all") {
+      list = list.filter((p) => (p.module || "General") === moduleFilter);
+    }
+    if (origin === "system") list = list.filter((p) => p.isSystem);
+    if (origin === "custom") list = list.filter((p) => !p.isSystem);
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (p) =>
+        p.code.toLowerCase().includes(q) ||
+        p.name.toLowerCase().includes(q) ||
+        p.module.toLowerCase().includes(q),
+    );
+  }, [query.data, moduleFilter, origin, search]);
+
+  const grouped = groupByModule(filteredPermissions);
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="space-y-4">
+    <div
+      className={cn(
+        "grid gap-6",
+        showCreateForm && "xl:grid-cols-[minmax(0,1fr)_320px]",
+      )}
+    >
       <div className="space-y-4">
         {query.isLoading ? (
           <div className="space-y-2">
@@ -86,24 +136,59 @@ export function PermissionsPanel() {
         ) : null}
 
         {query.data ? (
+          <DataTableCard
+            toolbar={
+              <DataTableToolbar
+                searchPlaceholder="Código o nombre…"
+                searchValue={search}
+                onSearchChange={setSearch}
+                filters={
+                  <>
+                    <SelectField
+                      id="filter-perm-module"
+                      variant="toolbar"
+                      label="Módulo"
+                      value={moduleFilter}
+                      onChange={setModuleFilter}
+                      options={[{ value: "all", label: "Todos" }, ...moduleOptions]}
+                    />
+                    <SelectField
+                      id="filter-perm-origin"
+                      variant="toolbar"
+                      label="Origen"
+                      value={origin}
+                      onChange={(v) => setOrigin(v as typeof origin)}
+                      options={[
+                        { value: "all", label: "Todos" },
+                        { value: "system", label: "Sistema" },
+                        { value: "custom", label: "Personalizado" },
+                      ]}
+                    />
+                  </>
+                }
+              />
+            }
+          >
+            {filteredPermissions.length === 0 ? (
+              <StatePanel variant="empty" title="Sin resultados" description="Ajuste búsqueda o filtros." />
+            ) : (
           <div className="space-y-6">
             {Object.entries(grouped).map(([module, items]) => (
               <div key={module}>
                 <h3 className="mb-2 text-sm font-semibold text-foreground">{module}</h3>
-                <div className="overflow-hidden rounded-lg border">
-                  <table className="w-full text-sm">
-                    <thead className="border-b bg-muted/40 text-left">
+                <DataTableShell>
+                    <thead className={dataTableHeadClass}>
                       <tr>
-                        <th className="px-4 py-2 font-semibold">Código</th>
-                        <th className="px-4 py-2 font-semibold">Nombre</th>
-                        <th className="w-12 px-2 py-2" aria-label="Acciones" />
+                        <th className={dataTableThClass}>Código</th>
+                        <th className={dataTableThClass}>Nombre</th>
+                        <th className={`${dataTableThClass} w-12`} aria-label="Acciones" />
                       </tr>
                     </thead>
                     <tbody>
                       {items.map((perm) => (
                         <tr key={perm.id} className="border-b last:border-0">
-                          <td className="px-4 py-2 font-mono text-xs">{perm.code}</td>
-                          <td className="px-4 py-2 font-normal">
+                          <td className={`${dataTableTdClass} font-mono text-xs`}>{perm.code}</td>
+                          <td className={dataTableTdClass}>
                             {perm.name}
                             {perm.isSystem ? (
                               <Badge variant="outline" className="ml-2 font-normal">
@@ -111,7 +196,7 @@ export function PermissionsPanel() {
                               </Badge>
                             ) : null}
                           </td>
-                          <td className="px-2 py-2 text-right">
+                          <td className={`${dataTableTdClass} text-right`}>
                             {!perm.isSystem ? (
                               <Button
                                 type="button"
@@ -127,14 +212,16 @@ export function PermissionsPanel() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
-                </div>
+                </DataTableShell>
               </div>
             ))}
           </div>
+            )}
+          </DataTableCard>
         ) : null}
       </div>
 
+      {showCreateForm ? (
       <form
         onSubmit={onCreate}
         className="h-fit space-y-4 rounded-lg border border-border p-4 xl:sticky xl:top-4"
@@ -166,10 +253,17 @@ export function PermissionsPanel() {
             placeholder="Facturación"
           />
         </div>
-        <Button type="submit" className="w-full" disabled={createMutation.isPending}>
-          Crear permiso
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button type="submit" disabled={createMutation.isPending}>
+            Crear permiso
+          </Button>
+          <Button type="button" variant="outline" onClick={() => onShowCreateFormChange(false)}>
+            Cancelar
+          </Button>
+        </div>
       </form>
+      ) : null}
+    </div>
 
       <AlertDialog open={deleteId !== null} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent>

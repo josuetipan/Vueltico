@@ -20,7 +20,6 @@ export function ShellBrandHeader({
   const wordmarkSrc = resolveShellBrandImageSrc("logoWordmark", config.logoWordmark);
   const collabSrc = resolveShellBrandImageSrc("logoCollaboration", config.logoCollaboration);
   const showDivider = Boolean(collabSrc);
-  const tagline = config.tagline.trim();
 
   const isPreview = variant === "preview";
 
@@ -70,16 +69,6 @@ export function ShellBrandHeader({
               Vueltico
             </p>
           )}
-          {tagline ? (
-            <p
-              className={cn(
-                "truncate text-sidebar-muted",
-                isPreview ? "text-[10px]" : "text-xs",
-              )}
-            >
-              {tagline}
-            </p>
-          ) : null}
         </div>
       </div>
 

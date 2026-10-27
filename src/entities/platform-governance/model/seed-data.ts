@@ -88,14 +88,39 @@ export const SEED_ROLES: PlatformRole[] = [
   },
 ];
 
+const seedPlatformAdmin = (
+  id: string,
+  email: string,
+  fullName: string,
+  roleId: string,
+  createdAt: string,
+  identification: string,
+): PlatformAdministrator => ({
+  id,
+  email,
+  fullName,
+  identification,
+  city: "Quito",
+  stateRegion: "Pichincha",
+  phone: "+593 99 100 0000",
+  planId: "business",
+  roleId,
+  status: "active",
+  createdAt,
+  expiresAt: "2026-12-31",
+  lastLoginAt: null,
+});
+
 export const SEED_PLATFORM_ADMINS: PlatformAdministrator[] = [
-  {
-    id: "padm-001",
-    email: "soporte@vueltico.demo",
-    fullName: "Laura Pérez",
-    roleId: "role-support",
-    status: "active",
-    createdAt: "2025-08-01T10:00:00.000Z",
-    lastLoginAt: "2026-03-10T14:22:00.000Z",
-  },
+  seedPlatformAdmin("padm-001", "soporte@vueltico.demo", "Laura Pérez", "role-support", "2025-08-01T10:00:00.000Z", "1712345678"),
+  seedPlatformAdmin("padm-002", "onboarding@vueltico.demo", "Marco Silva", "role-onboarding", "2025-08-05T10:00:00.000Z", "1722345678"),
+  seedPlatformAdmin("padm-003", "admin1@vueltico.demo", "Patricia Gómez", "role-super-full", "2025-08-10T10:00:00.000Z", "1732345678"),
+  seedPlatformAdmin("padm-004", "admin2@vueltico.demo", "Felipe Torres", "role-support", "2025-08-15T10:00:00.000Z", "1742345678"),
+  seedPlatformAdmin("padm-005", "admin3@vueltico.demo", "Camila Ríos", "role-onboarding", "2025-09-01T10:00:00.000Z", "1752345678"),
+  seedPlatformAdmin("padm-006", "admin4@vueltico.demo", "Andrés Vargas", "role-support", "2025-09-10T10:00:00.000Z", "1762345678"),
+  seedPlatformAdmin("padm-007", "admin5@vueltico.demo", "Valentina Cruz", "role-super-full", "2025-09-20T10:00:00.000Z", "1772345678"),
+  seedPlatformAdmin("padm-008", "admin6@vueltico.demo", "Tomás Herrera", "role-onboarding", "2025-10-01T10:00:00.000Z", "1782345678"),
+  seedPlatformAdmin("padm-009", "admin7@vueltico.demo", "Isabel Morales", "role-support", "2025-10-10T10:00:00.000Z", "1792345678"),
+  seedPlatformAdmin("padm-010", "admin8@vueltico.demo", "Gabriel Peña", "role-onboarding", "2025-10-15T10:00:00.000Z", "1702345678"),
+  seedPlatformAdmin("padm-011", "admin9@vueltico.demo", "Renata Solís", "role-super-full", "2025-10-20T10:00:00.000Z", "1713345678"),
 ];

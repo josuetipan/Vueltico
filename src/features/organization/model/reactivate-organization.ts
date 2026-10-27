@@ -18,6 +18,6 @@ export function createReactivateOrganizationUseCase(
 
 export function reactivateErrorMessage(code: string): string {
   if (code === "NOT_FOUND") return "Organización no encontrada.";
-  if (code === "NOT_SUSPENDED") return ruleErrorMessage("NOT_SUSPENDED");
+  if (code === "NOT_CANCELED") return ruleErrorMessage("NOT_CANCELED");
   return "No se pudo reactivar la organización.";
 }

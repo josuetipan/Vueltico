@@ -3,7 +3,10 @@ import {
   SEED_PLATFORM_ADMINS,
   SEED_ROLES,
 } from "../model/seed-data";
-import type { PlatformAdministrator } from "../model/platform-admin";
+import {
+  normalizePlatformAdministrator,
+  type PlatformAdministrator,
+} from "../model/platform-admin";
 import {
   isValidPermissionCode,
   normalizePermissionCode,
@@ -58,7 +61,9 @@ function readStore(): GovernanceStore {
     return {
       permissions: parsed.permissions?.length ? parsed.permissions : [...SEED_PERMISSIONS],
       roles: parsed.roles?.length ? parsed.roles : [...SEED_ROLES],
-      admins: parsed.admins ?? [...SEED_PLATFORM_ADMINS],
+      admins: (parsed.admins ?? [...SEED_PLATFORM_ADMINS]).map((a) =>
+        normalizePlatformAdministrator(a as PlatformAdministrator),
+      ),
     };
   } catch {
     return {
@@ -187,8 +192,9 @@ export const mockGovernanceRepository: GovernanceRepository = {
 
   async createPlatformAdmin(input: CreatePlatformAdminInput) {
     const email = input.email.trim().toLowerCase();
-    const fullName = input.fullName.trim();
-    if (!email || !fullName || !input.roleId) throw new GovernanceError("empty_fields");
+    if (!email || !input.fullName.trim() || !input.roleId || !input.identification.trim()) {
+      throw new GovernanceError("empty_fields");
+    }
 
     const store = readStore();
     if (!store.roles.some((r) => r.id === input.roleId)) throw new GovernanceError("role_not_found");
@@ -196,15 +202,21 @@ export const mockGovernanceRepository: GovernanceRepository = {
       throw new GovernanceError("admin_email_exists");
     }
 
-    const admin: PlatformAdministrator = {
+    const admin = normalizePlatformAdministrator({
       id: newId("padm"),
       email,
-      fullName,
+      fullName: input.fullName,
+      identification: input.identification,
+      city: input.city,
+      stateRegion: input.stateRegion,
+      phone: input.phone,
+      planId: input.planId,
       roleId: input.roleId,
       status: "invited",
       createdAt: new Date().toISOString(),
+      expiresAt: input.expiresAt,
       lastLoginAt: null,
-    };
+    });
     store.admins.push(admin);
     writeStore(store);
     return admin;
@@ -216,12 +228,21 @@ export const mockGovernanceRepository: GovernanceRepository = {
     if (index === -1) throw new GovernanceError("not_found");
     if (!store.roles.some((r) => r.id === input.roleId)) throw new GovernanceError("role_not_found");
 
-    const updated: PlatformAdministrator = {
-      ...store.admins[index]!,
-      fullName: input.fullName.trim(),
+    const prev = store.admins[index]!;
+    const updated = normalizePlatformAdministrator({
+      ...prev,
+      email: input.email.trim().toLowerCase(),
+      fullName: input.fullName,
+      identification: input.identification,
+      city: input.city,
+      stateRegion: input.stateRegion,
+      phone: input.phone,
+      planId: input.planId,
       roleId: input.roleId,
       status: input.status,
-    };
+      expiresAt: input.expiresAt,
+      createdAt: prev.createdAt,
+    });
     store.admins[index] = updated;
     writeStore(store);
     return updated;

@@ -3,8 +3,6 @@ import { SuperadminDashboardClient } from "@/pages/superadmin-dashboard";
 import { OrganizationsListClient } from "@/features/organization-list";
 import { OrganizationWizardClient } from "@/features/organization-create";
 import { OrganizationDetailClient } from "@/features/organization-detail";
-import { OrganizationEditClient } from "@/features/organization-edit";
-import { InvitePrincipalAdminClient } from "@/features/organization-invite";
 import { TransferInboxClient } from "@/features/transfer-inbox";
 import { TransferDetailClient } from "@/features/transfer-detail";
 import { CommercialReportClient } from "@/features/commercial-report";
@@ -35,16 +33,10 @@ function OrgDetailRoute() {
   return <OrganizationDetailClient organizationId={id} />;
 }
 
-function OrgEditRoute() {
+function OrgEditRedirectRoute() {
   const { id } = useParams();
-  if (!id) return null;
-  return <OrganizationEditClient organizationId={id} />;
-}
-
-function OrgInviteRoute() {
-  const { id } = useParams();
-  if (!id) return null;
-  return <InvitePrincipalAdminClient organizationId={id} />;
+  if (!id) return <Navigate to="/app/superadmin/empresas" replace />;
+  return <Navigate to={`/app/superadmin/empresas/${id}`} replace />;
 }
 
 function TransferDetailRoute() {
@@ -67,11 +59,14 @@ export function AppRoutes() {
       <Route path="/app/superadmin/parametrizacion" element={<SuperadminParametrizationPage />} />
       <Route path="/app/superadmin/gobernanza" element={<GovernanceClient />} />
       <Route path="/app/superadmin/administradores" element={<PlatformAdminsClient />} />
+      <Route
+        path="/app/superadmin/admins-empresas"
+        element={<Navigate to="/app/superadmin/empresas" replace />}
+      />
       <Route path="/app/superadmin/empresas" element={<OrganizationsListClient />} />
       <Route path="/app/superadmin/empresas/nueva" element={<OrganizationWizardClient />} />
       <Route path="/app/superadmin/empresas/:id" element={<OrgDetailRoute />} />
-      <Route path="/app/superadmin/empresas/:id/editar" element={<OrgEditRoute />} />
-      <Route path="/app/superadmin/empresas/:id/invitar-admin" element={<OrgInviteRoute />} />
+      <Route path="/app/superadmin/empresas/:id/editar" element={<OrgEditRedirectRoute />} />
 
       <Route path="/app/empresa" element={<CompanyDashboardPage />} />
       <Route path="/app/empresa/transferencias" element={<TransferInboxClient mode="pending" />} />

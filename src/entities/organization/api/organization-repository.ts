@@ -1,30 +1,31 @@
 import type { ApiListResponse } from "@/shared/api/contracts";
+import type { PlanId } from "@/entities/plan";
 import type {
   Organization,
   OrganizationListItem,
-  OrganizationLimits,
-  PlanId,
+  SubscriptionStatus,
 } from "@/entities/organization/model/organization";
 
 export type ListOrganizationsFilters = {
   page: number;
   pageSize: number;
   search?: string;
-  status?: Organization["status"] | "all";
+  subscriptionStatus?: SubscriptionStatus | "all";
   planId?: PlanId | "all";
 };
 
 export type CreateOrganizationInput = {
   tradeName: string;
   legalName: string;
-  ruc: string;
+  taxId: string;
   email: string;
   phone: string;
+  countryId?: string | null;
   country: string;
-  province: string;
+  cityId?: string | null;
   city: string;
+  address: string;
   planId: PlanId;
-  limits: OrganizationLimits;
   principalAdmin: {
     fullName: string;
     email: string;
@@ -34,20 +35,16 @@ export type CreateOrganizationInput = {
 export type UpdateOrganizationInput = {
   tradeName: string;
   legalName: string;
-  ruc: string;
+  taxId: string;
   email: string;
   phone: string;
+  countryId?: string | null;
   country: string;
-  province: string;
+  cityId?: string | null;
   city: string;
+  address: string;
   planId: PlanId;
-  limits: OrganizationLimits;
-};
-
-export type InvitePrincipalAdminInput = {
-  organizationId: string;
-  fullName: string;
-  email: string;
+  subscriptionStatus: SubscriptionStatus;
 };
 
 export type OrganizationRepository = {
@@ -57,5 +54,4 @@ export type OrganizationRepository = {
   update(id: string, input: UpdateOrganizationInput, actorEmail: string): Promise<Organization>;
   suspend(id: string, actorEmail: string): Promise<Organization>;
   reactivate(id: string, actorEmail: string): Promise<Organization>;
-  invitePrincipalAdmin(input: InvitePrincipalAdminInput, actorEmail: string): Promise<Organization>;
 };

@@ -7,7 +7,12 @@ export {
 export type { PlatformRole } from "./model/role";
 export { isValidRoleCode, normalizeRoleCode, ROLE_CODE_PATTERN } from "./model/role";
 export type { PlatformAdministrator, PlatformAdminStatus } from "./model/platform-admin";
-export { PLATFORM_ADMIN_STATUSES, adminInitials } from "./model/platform-admin";
+export {
+  PLATFORM_ADMIN_STATUSES,
+  adminInitials,
+  defaultAdminExpiry,
+  normalizePlatformAdministrator,
+} from "./model/platform-admin";
 export type {
   CreatePermissionInput,
   CreatePlatformAdminInput,

@@ -1,68 +1,70 @@
-export const SUBSCRIPTION_PLANS = [
-  { id: "trial", name: "Trial 14d", maxUsers: 5 },
-  { id: "growth", name: "Growth", maxUsers: 30 },
-  { id: "business", name: "Business", maxUsers: 100 },
+import type { PlanId } from "@/entities/plan";
+
+/**
+ * Tabla `companies` / tenant (prototipo alineado a modelo relacional).
+ * Campos en camelCase en front; en BD: legal_name, trade_name, tax_id, plan_id, subscription_status, created_at, etc.
+ */
+export const SUBSCRIPTION_STATUSES = [
+  "TRIAL",
+  "ACTIVE",
+  "PAST_DUE",
+  "CANCELED",
+  "EXPIRED",
 ] as const;
 
-export type PlanId = (typeof SUBSCRIPTION_PLANS)[number]["id"];
-
-export type OrganizationStatus = "active" | "suspended" | "trial";
-
-export type OrganizationLimits = {
-  maxUsers: number;
-  maxBranches: number;
-  storageGb: number;
-};
-
-export type PrincipalAdmin = {
-  fullName: string;
-  email: string;
-  inviteStatus: "pending" | "accepted";
-};
+export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
 
 export type Organization = {
   id: string;
-  tradeName: string;
   legalName: string;
-  ruc: string;
-  email: string;
+  tradeName: string;
+  /** RUC / identificación tributaria (único) */
+  taxId: string;
   phone: string;
+  email: string;
+  countryId: string | null;
   country: string;
-  province: string;
+  cityId: string | null;
   city: string;
+  address: string;
   planId: PlanId;
-  status: OrganizationStatus;
-  registeredAt: string;
-  limits: OrganizationLimits;
-  admin: PrincipalAdmin;
-  activeUsersCount: number;
-  tenantIsolationKey: string;
+  subscriptionStatus: SubscriptionStatus;
+  createdAt: string;
 };
 
 export type OrganizationListItem = {
   id: string;
   tradeName: string;
   legalName: string;
-  ruc: string;
+  taxId: string;
   planName: string;
-  status: OrganizationStatus;
-  activeUsersCount: number;
-  registeredAt: string;
+  subscriptionStatus: SubscriptionStatus;
+  /** Conteo desde company_users */
+  memberCount: number;
+  createdAt: string;
 };
 
-export function getPlanById(planId: PlanId) {
-  const plan = SUBSCRIPTION_PLANS.find((p) => p.id === planId);
-  if (!plan) throw new Error("INVALID_PLAN");
-  return plan;
-}
-
-export function organizationStatusLabel(status: OrganizationStatus): string {
+export function subscriptionStatusLabel(status: SubscriptionStatus): string {
   switch (status) {
-    case "active":
-      return "Activa";
-    case "trial":
+    case "TRIAL":
       return "Prueba";
-    case "suspended":
-      return "Suspendida";
+    case "ACTIVE":
+      return "Activa";
+    case "PAST_DUE":
+      return "Pago pendiente";
+    case "CANCELED":
+      return "Cancelada";
+    case "EXPIRED":
+      return "Expirada";
   }
 }
+
+/** @deprecated use SubscriptionStatus */
+export type OrganizationStatus = SubscriptionStatus;
+
+/** @deprecated use subscriptionStatusLabel */
+export function organizationStatusLabel(status: SubscriptionStatus): string {
+  return subscriptionStatusLabel(status);
+}
+
+export { getPlanById, getPlanLimits, SUBSCRIPTION_PLANS, type PlanId } from "@/entities/plan";
