@@ -37,7 +37,7 @@ const schema = z.object({
   countryId: z.string().min(1, "Seleccione país"),
   cityId: z.string().min(1, "Seleccione ciudad"),
   address: z.string().min(3),
-  planId: z.enum(["trial", "growth", "business"]),
+  planId: z.string().min(1),
   subscriptionStatus: z.enum(SUBSCRIPTION_STATUSES),
 });
 

@@ -6,6 +6,7 @@ import {
   FileSearch,
   KeyRound,
   LayoutDashboard,
+  LayoutGrid,
   Palette,
   Settings,
   Shield,
@@ -46,10 +47,19 @@ const superadminNav: NavSection[] = [
     items: [
       { title: "Empresas", href: "/app/superadmin/empresas", icon: Building2 },
       {
-        title: "Planes y facturación",
+        title: "Planes",
         href: "/app/superadmin/planes",
         icon: CreditCard,
-        disabled: true,
+      },
+      {
+        title: "Suscripciones",
+        href: "/app/superadmin/suscripciones",
+        icon: Wallet,
+      },
+      {
+        title: "Facturas",
+        href: "/app/superadmin/facturas",
+        icon: BarChart3,
       },
       {
         title: "Admins. plataforma",
@@ -59,10 +69,30 @@ const superadminNav: NavSection[] = [
     ],
   },
   {
+    label: "Sistema",
+    items: [
+      {
+        title: "Pantallas y módulos",
+        href: "/app/superadmin/sistema/pantallas",
+        icon: LayoutGrid,
+      },
+      {
+        title: "Permisos por pantalla",
+        href: "/app/superadmin/sistema/permisos",
+        icon: Shield,
+      },
+      {
+        title: "Roles globales",
+        href: "/app/superadmin/sistema/roles",
+        icon: Users,
+      },
+    ],
+  },
+  {
     label: "Gobernanza",
     items: [
       {
-        title: "Permisos y roles",
+        title: "Permisos y roles (plataforma)",
         href: "/app/superadmin/gobernanza",
         icon: KeyRound,
       },

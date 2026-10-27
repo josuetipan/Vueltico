@@ -3,6 +3,7 @@ import {
   BarChart3,
   Building2,
   LayoutDashboard,
+  LayoutGrid,
   LogIn,
   Smartphone,
   Wallet,
@@ -14,7 +15,8 @@ export type PrototypeModuleId =
   | "organizations"
   | "transfer-reconciliation"
   | "commercial-reports"
-  | "operator-portal";
+  | "operator-portal"
+  | "system-catalog";
 
 export type PrototypeModuleEntry = {
   id: PrototypeModuleId;
@@ -80,6 +82,15 @@ export const PROTOTYPE_MODULES: PrototypeModuleEntry[] = [
     path: "/prototipos/operator-portal",
     icon: Smartphone,
     audience: "Operador",
+  },
+  {
+    id: "system-catalog",
+    name: "Catálogo de pantallas (árbol)",
+    folder: "pages/prototypes/system-catalog",
+    description: "Modelo Captec: PANTALLAS API, mapper, permisos granulares y canPerform.",
+    path: "/prototipos/system-catalog",
+    icon: LayoutGrid,
+    audience: "Superadmin",
   },
 ];
 

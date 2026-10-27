@@ -1,43 +1,49 @@
-/** Tabla `plans` — límites heredados por la empresa vía plan_id. */
-export const SUBSCRIPTION_PLANS = [
-  {
-    id: "trial",
-    name: "Trial 14d",
-    maxUsers: 5,
-    maxBranches: 1,
-    storageGb: 10,
-  },
-  {
-    id: "growth",
-    name: "Growth",
-    maxUsers: 30,
-    maxBranches: 3,
-    storageGb: 50,
-  },
-  {
-    id: "business",
-    name: "Business",
-    maxUsers: 100,
-    maxBranches: 10,
-    storageGb: 150,
-  },
-] as const;
+import { mockBillingRepository } from "@/entities/billing/api/mock-billing-repository";
+import {
+  getPlanLimitsFromSaasPlan,
+  type PlanId,
+  type SaasPlan,
+} from "./plan-types";
 
-export type PlanId = (typeof SUBSCRIPTION_PLANS)[number]["id"];
+export type Plan = SaasPlan;
+export type { PlanId } from "./plan-types";
 
-export type Plan = (typeof SUBSCRIPTION_PLANS)[number];
-
-export function getPlanById(planId: PlanId): Plan {
-  const plan = SUBSCRIPTION_PLANS.find((p) => p.id === planId);
+export function getPlanById(planId: PlanId): SaasPlan {
+  const plan = mockBillingRepository.getPlanById(planId);
   if (!plan) throw new Error("INVALID_PLAN");
   return plan;
 }
 
-export function getPlanLimits(planId: PlanId) {
-  const plan = getPlanById(planId);
+export function listPlansForSelect(): { id: string; name: string }[] {
+  return mockBillingRepository
+    .listPlans()
+    .filter((p) => p.status === "ACTIVE")
+    .map((p) => ({ id: p.id, name: p.name }));
+}
+
+/** @deprecated use listPlansForSelect() */
+export const SUBSCRIPTION_PLANS = listPlansForSelect().map((p) => {
+  const plan = getPlanById(p.id);
   return {
+    id: plan.id,
+    name: plan.name,
     maxUsers: plan.maxUsers,
     maxBranches: plan.maxBranches,
     storageGb: plan.storageGb,
   };
+});
+
+export function getPlanLimits(planId: PlanId) {
+  return getPlanLimitsFromSaasPlan(getPlanById(planId));
 }
+
+export {
+  PLAN_STATUSES,
+  computeAnnualDiscountPercent,
+  getPlanLimitsFromSaasPlan,
+  planStatusLabel,
+  type PlanFeatures,
+  type PlanStatus,
+  type PlanSummary,
+  type SaasPlan,
+} from "./plan-types";

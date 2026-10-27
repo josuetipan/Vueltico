@@ -26,6 +26,16 @@ import { PrototypeRoutes } from "@/app/router/prototype-routes";
 import { SuperadminParametrizationPage } from "@/pages/superadmin-parametrization";
 import { GovernanceClient } from "@/features/platform-governance";
 import { PlatformAdminsClient } from "@/features/platform-admins";
+import {
+  InvoicesClient,
+  PlansCatalogClient,
+  SubscriptionsClient,
+} from "@/features/platform-billing";
+import {
+  GlobalRolesClient,
+  ScreenActionsClient,
+  ScreensCatalogClient,
+} from "@/features/system-catalog";
 
 function OrgDetailRoute() {
   const { id } = useParams();
@@ -67,6 +77,12 @@ export function AppRoutes() {
       <Route path="/app/superadmin/empresas/nueva" element={<OrganizationWizardClient />} />
       <Route path="/app/superadmin/empresas/:id" element={<OrgDetailRoute />} />
       <Route path="/app/superadmin/empresas/:id/editar" element={<OrgEditRedirectRoute />} />
+      <Route path="/app/superadmin/planes" element={<PlansCatalogClient />} />
+      <Route path="/app/superadmin/suscripciones" element={<SubscriptionsClient />} />
+      <Route path="/app/superadmin/facturas" element={<InvoicesClient />} />
+      <Route path="/app/superadmin/sistema/pantallas" element={<ScreensCatalogClient />} />
+      <Route path="/app/superadmin/sistema/permisos" element={<ScreenActionsClient />} />
+      <Route path="/app/superadmin/sistema/roles" element={<GlobalRolesClient />} />
 
       <Route path="/app/empresa" element={<CompanyDashboardPage />} />
       <Route path="/app/empresa/transferencias" element={<TransferInboxClient mode="pending" />} />

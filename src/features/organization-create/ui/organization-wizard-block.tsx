@@ -23,7 +23,7 @@ const wizardSchema = z.object({
   countryId: z.string().min(1, "Seleccione país"),
   cityId: z.string().min(1, "Seleccione ciudad"),
   address: z.string().min(3, "Dirección requerida"),
-  planId: z.enum(["trial", "growth", "business"]),
+  planId: z.string().min(1),
   adminFullName: z.string().min(2),
   adminEmail: z.string().email(),
 });

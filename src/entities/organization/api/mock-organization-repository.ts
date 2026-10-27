@@ -366,6 +366,27 @@ export const mockOrganizationRepository: OrganizationRepository = {
 
 };
 
+/** Sincroniza tenant cuando cambia facturación / suscripción (prototipo). */
+export function syncOrganizationSubscription(
+  organizationId: string,
+  patch: { planId?: Organization["planId"]; subscriptionStatus?: Organization["subscriptionStatus"] },
+): void {
+  const idx = organizations.findIndex((o) => o.id === organizationId);
+  if (idx < 0) return;
+  organizations[idx] = { ...organizations[idx]!, ...patch };
+}
+
+export function getOrganizationIndexForBilling(): Map<
+  string,
+  { tradeName: string; taxId: string }
+> {
+  const map = new Map<string, { tradeName: string; taxId: string }>();
+  for (const org of organizations) {
+    map.set(org.id, { tradeName: org.tradeName, taxId: org.taxId });
+  }
+  return map;
+}
+
 function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
